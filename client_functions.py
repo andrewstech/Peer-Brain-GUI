@@ -172,8 +172,7 @@ def get_user_friends(server_url:str)->None:
 
     usernames = []
     for key, value in data.items():
-        usernames.append(key)
-        
+        usernames.append(key)    
     return tuple(usernames)
 
 def get_all_users(server_url:str)->tuple:

@@ -1,0 +1,8 @@
+token.json
+keys/message.key
+keys/private_key.pem
+keys/public_key.pem
+keys/secret.key
+keys/secret.key.pub
+__pycache__/
+app.log

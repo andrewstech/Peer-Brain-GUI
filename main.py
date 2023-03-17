@@ -22,7 +22,7 @@ import os
 import sys
 import time
 import pyfiglet
-from client_functions import check_token, login, log_out, log_in_to_server, get_account_info, reset_password, register_user, upload_keystore
+from client_functions import check_token, get_all_users, login, log_out, log_in_to_server, get_account_info, reset_password, register_user, upload_keystore, get_user_friends
 
 app = Flask(__name__)
 
@@ -50,6 +50,24 @@ def index():
         return redirect("/user/", code=302)
     else:
         return render_template('index.html')
+    
+@app.route('/account/')
+def account():
+    if check_token(server_url):
+        username, email = get_account_info(server_url)
+        return render_template('account.html', user_account=username, user_account_email=email)
+    else:
+        return redirect("/", code=302)  
+
+@app.route('/friends/')
+def friends():
+    users = get_all_users(server_url)
+    usernames = [username for username in users.keys()]
+    return render_template('friend.html', friends=usernames)
+
+@app.route('/profile/<friend>')
+def show_profile(friend):
+    return render_template('profile.html', Friend=friend)
 
 @app.route('/resetpassword/')
 def resetpassword():
