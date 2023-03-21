@@ -43,13 +43,25 @@ def not_found_error(error):
 def not_found_error(error):
     return render_template('405.html'),405
 
+@app.route('/login/')
+def login():
+    return render_template('index.html')
+
 @app.route('/')
 def index():
-    if check_token(server_url):
-        username, email = get_account_info(server_url)
-        return redirect("/user/", code=302)
-    else:
-        return render_template('index.html')
+    url = 'https://public.pixelsltd.dev/projects/peer-brain/version/'
+    response = requests.get(url)
+    if response.status_code == 200:
+            data = response.json()
+            if data['version'] != "Alpha-v1s":
+                return render_template('update.html', version=data['version'], changelog=data['changelog'], download=data['Download'])
+            else:
+                if check_token(server_url):
+                    username, email = get_account_info(server_url)
+                    return redirect("/user/", code=302)
+                else:
+                    return render_template('index.html')
+    
     
 @app.route('/account/')
 def account():
@@ -165,4 +177,7 @@ if __name__ == "__main__":
   # If you are debugging you can do that in the browser:
   # app.run()
   # If you want to view the flaskwebgui window:
+
+# If the request was successful, parse the JSON data
+
   FlaskUI(app=app, server="flask", width=800, height=600).run()
