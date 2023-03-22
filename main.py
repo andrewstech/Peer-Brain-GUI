@@ -22,17 +22,26 @@ import os
 import sys
 import time
 import pyfiglet
-from client_functions import check_token, get_all_users, login, log_out, log_in_to_server, get_account_info, reset_password, register_user, upload_keystore, get_user_friends
+from client_functions import check_token, get_all_users, get_thoughts_for_user, login, log_out, log_in_to_server, get_account_info, reset_password, register_user, upload_keystore, get_user_friends
+import sentry_sdk
+from flask import Flask
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn="https://c368c5790a4143f6b79bf6f6f06762c9@o4504878133018624.ingest.sentry.io/4504878148157440",
+    integrations=[
+        FlaskIntegration(),
+    ],
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0
+)
 
 app = Flask(__name__)
 
 server_url = "https://peerbrain.teckhawk.be/"
-
-
-
-LOG_FILE = 'app.log'
-log = logging.getLogger('__name__')
-logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
 
 
 @app.errorhandler(404)
@@ -45,7 +54,11 @@ def not_found_error(error):
 
 @app.route('/login/')
 def login():
-    return render_template('index.html')
+    if check_token(server_url):
+        username, email = get_account_info(server_url)
+        return redirect("/user/", code=302)
+    else:
+        return render_template('index.html')
 
 @app.route('/')
 def index():
@@ -73,12 +86,12 @@ def account():
 
 @app.route('/friends/')
 def friends():
-    users = get_all_users(server_url)
-    usernames = [username for username in users.keys()]
-    return render_template('friend.html', friends=usernames)
+    users = ('friend1', 'friend2', 'friend1')
+    return render_template('friend.html', friends=users)
 
 @app.route('/profile/<friend>')
 def show_profile(friend):
+    get_thoughts_for_user(server_url, friend)
     return render_template('profile.html', Friend=friend)
 
 @app.route('/resetpassword/')
@@ -108,23 +121,14 @@ def technical():
 app.route('/genkey/')
 def genkey():
     if check_token(server_url):
-        username, email = get_account_info(server_url)
-        if detect_private_key() and detect_sym_key() and detect_public_key():
-                            print()
-                            print("Keys already exist, overwriting them will make your account irretrievable!!")
-                            print()
-                            print("Key creation canceled!")
-                            render_template('technical.html', Warning="Keys already exist")
-                            
-        else:    
-            public_key, private_key = generate_keypair()
-            save_private_key(private_key)
-            save_public_key(public_key)
-            symmetric_key = generate_sym_key()
-            upload_result = upload_keystore(server_url, public_key, symmetric_key)
-            print("------------------------")
-            print(upload_result)
-            print("------------------------")
+        public_key, private_key = generate_keypair()
+        save_private_key(private_key)
+        save_public_key(public_key)
+        symmetric_key = generate_sym_key()
+        upload_result = upload_keystore(server_url, public_key, symmetric_key)
+        print("------------------------")
+        print(upload_result)
+        print("------------------------")
         return render_template('technical.html', Warning="New keys generated!")
     else:
         return redirect("/", code=302)    
@@ -170,7 +174,7 @@ def logout():
 @app.errorhandler(500)
 def internal_server_error(e):
     # note that we set the 500 status explicitly
-    return render_template('500.html'), 500
+    return render_template('500.html', event_id=sentry_sdk.last_event_id()), 500
  
 
 if __name__ == "__main__":

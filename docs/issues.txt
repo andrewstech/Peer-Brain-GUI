@@ -1,0 +1,1 @@
+If you have any issues then open a report here: https://github.com/shandralor/PeerBrain/issues
