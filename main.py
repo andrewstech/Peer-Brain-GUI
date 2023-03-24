@@ -1,3 +1,4 @@
+import argparse
 from flask import Flask, render_template, request, url_for, flash, redirect, Response
 from pygtail import Pygtail
 from flaskwebgui import FlaskUI # import FlaskUI
@@ -41,7 +42,13 @@ sentry_sdk.init(
 
 app = Flask(__name__)
 
-server_url = "https://peerbrain.teckhawk.be/"
+argParser = argparse.ArgumentParser()
+argParser.add_argument("-s", "--server", help="Dev or live server", type=str, default="live")
+args = argParser.parse_args()
+if args.server == "dev":
+    server_url = "https://74c6-213-219-142-51.eu.ngrok.io/"
+else:
+    server_url = "https://peerbrain.teckhawk.be/"  
 
 
 @app.errorhandler(404)
@@ -66,7 +73,7 @@ def index():
     response = requests.get(url)
     if response.status_code == 200:
             data = response.json()
-            if data['version'] != "Alpha-v1s":
+            if data['version'] != "Alpha-v1":
                 return render_template('update.html', version=data['version'], changelog=data['changelog'], download=data['Download'])
             else:
                 if check_token(server_url):
@@ -86,13 +93,31 @@ def account():
 
 @app.route('/friends/')
 def friends():
-    users = ('friend1', 'friend2', 'friend1')
-    return render_template('friend.html', friends=users)
+    if check_token(server_url):
+        friends = get_user_friends(server_url)
+        print(friends)
+        return render_template('friend.html', friends=friends)
+    else:
+        return redirect("/", code=302)
 
 @app.route('/profile/<friend>')
 def show_profile(friend):
-    get_thoughts_for_user(server_url, friend)
-    return render_template('profile.html', Friend=friend)
+    thoughts = get_thoughts_for_user(server_url, friend)
+    print(thoughts)
+    if thoughts == []:
+        no_thoughts = ('No thoughts found', '')
+        return render_template('profile.html', Friend=friend , thoughts=no_thoughts)
+    return render_template('profile.html', Friend=friend , thoughts=thoughts)
+
+@app.route('/unfriend/<friend>')
+def unfriend(friend):
+    if check_token(server_url):
+        remove_user_friends(server_url, friend)
+        friends = get_user_friends(server_url)
+        print(friends)
+        return render_template('friend.html', friends=friends)
+    else:
+        return redirect("/", code=302)
 
 @app.route('/resetpassword/')
 def resetpassword():

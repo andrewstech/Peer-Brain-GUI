@@ -59,7 +59,11 @@
                     <p class="mb-0 text-muted disabled"><a href="" class="large">{{ Friend }}</a></p>
 
 					<div>
-                        <div></div>
+                        <ul>
+                            {% for thought in thoughts %}
+                            <li>{{ thought }}</a></li>
+                            {% endfor %}
+                        </ul>
                         
 					</div>
 
@@ -68,10 +72,8 @@
 
                     
 
-                    <p class="mb-2 text-muted">
-                        &copy; <a target="_blank" href="/">AndrewsTech</a> 
-                        .
-                    </p>
+                    <div class="btn"><a href="/unfriend/{{ Friend }}">Remove Friend</a></div>
+                    <div class="btn"><a href="/friends/">Back</a></div>
                 </div>
             </div>
         </div>
