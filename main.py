@@ -23,7 +23,7 @@ import os
 import sys
 import time
 import pyfiglet
-from client_functions import check_token, get_all_users, get_thoughts_for_user, login, log_out, log_in_to_server, get_account_info, reset_password, register_user, upload_keystore, get_user_friends
+from client_functions import add_user_friends, check_token, get_all_users, get_thoughts_for_user, login, log_out, log_in_to_server, get_account_info, remove_user_friends, reset_password, register_user, upload_keystore, get_user_friends
 import sentry_sdk
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -113,11 +113,27 @@ def show_profile(friend):
 def unfriend(friend):
     if check_token(server_url):
         remove_user_friends(server_url, friend)
+        unfriend = ('You are no longer friends with', friend)
         friends = get_user_friends(server_url)
         print(friends)
-        return render_template('friend.html', friends=friends)
+        return render_template('friend.html', friends=friends, unfriend=unfriend)
     else:
         return redirect("/", code=302)
+
+@app.route('/addfriend/')
+def addfriend():
+    if check_token(server_url):
+        return render_template('addfriend.html')
+    else:
+        return redirect("/", code=302)
+    
+@app.route('/addfriends/', methods=['POST'])
+def addfriends():
+    if request.method == 'POST':
+        friend = request.form['friend']
+        add_user_friends(server_url, friend)
+        friendg = 'You are now friends with', friend
+        redirect("/friends/", code=302, addfriend=friendg)    
 
 @app.route('/resetpassword/')
 def resetpassword():

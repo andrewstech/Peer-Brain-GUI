@@ -7,14 +7,13 @@
     <title>PeerBrain</title>
     <meta name="viewport" content="width=device-width, initial-scale=2.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <link rel="stylesheet" href="https://andrewstech.github.io/public/peer-brain/buttons.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sono">
-    
+    <link rel="stylesheet" href="https://andrewstech.github.io/public/peer-brain/buttons.css">
+
 
     <link rel="stylesheet" href="https://appsrv1-147a1.kxcdn.com/dattaable/plugins/animation/css/animate.min.css">
     <!-- vendor css -->
     <link rel="stylesheet" href="https://appsrv1-147a1.kxcdn.com/dattaable/css/style.css">
-    
 
     <!-- Specific CSS goes HERE -->
     <style>
@@ -54,18 +53,17 @@
                 <span class="r s"></span>
                 <span class="r"></span>
             </div>
-            <div class="card container">
+            <div class="card">
                 <div class="card-body text-center">
-                    <p class="mb-0 text-muted disabled"><a href="" class="large">Friends</a></p>
-                    <p>{{ unfriend }}</p>
-                    <p>{{ addfriend }}</p>
+                    <p class="mb-0 text-muted disabled"><a href="" class="large">Peer Brain</a></p>
 					<div>
-                        <div></div>
-                        <ul>
-                            {% for friend in friends %}
-                            <li><a href="/profile/{{ friend[0] }}">{{ friend[0] }}</a></li>
-                            {% endfor %}
-                        </ul>
+                        <p class="mb-0 text-muted disabled"><a href="" disabled>Add Friend</a></p>
+                            <form action="/addfriends/" method="post">
+                                <label for="fname">Username:</label><br>
+                                <input type="text" id="username" name="username"><br>
+                                <input type="submit" value="Submit">
+                              </form> 
+                        <p class="mb-0 text-muted disabled"><a style="color:red"href="" disabled>{{ error }}</a></p>      
 					</div>
 
                     <br />
@@ -73,9 +71,10 @@
 
                     
 
+                    <div class="btn"><a href="/user">Main menu!</a></div>
+                    <br />
                     <p class="mb-2 text-muted">
-                        <div class="btn"><a href="/addfriend">Add Friend</a></div>
-                        <div class="btn"><a href="/user">Main menu</a></div>
+                        &copy; <a target="_blank" href="https://github.com/andrewstech/">AndrewsTech</a> 
                         .
                     </p>
                 </div>
